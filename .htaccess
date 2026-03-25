@@ -1,0 +1,4 @@
+# Deny web access to config and batch files
+<FilesMatch "\.(ini|bat)$">
+    Require all denied
+</FilesMatch>
