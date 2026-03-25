@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: MCP Editor Abilities
-Plugin URI:  https://github.com/vincentguigui/wp-mcp-edit-abilities
+Plugin URI:  https://github.com/vincentguigui/wp-mcp-editor-abilities
 Description: Exposes WordPress editor abilities through the MCP adapter.
 Version:     1.3.0
 Author:      Vincent Guigui
@@ -17,13 +17,21 @@ add_filter( 'wp_register_ability_args', function( array $args ): array {
     return $args;
 } );
 
+// Register the 'post' category (core only ships 'site' and 'user').
+add_action( 'wp_abilities_api_categories_init', function() {
+    wp_register_ability_category( 'post', array(
+        'label'       => 'Post',
+        'description' => 'Abilities that retrieve or modify posts and their content.',
+    ) );
+} );
+
 // Register custom abilities.
 add_action( 'wp_abilities_api_init', function() {
 
     // ----------------------------------------------------------------
     // list-posts
     // ----------------------------------------------------------------
-    wp_register_ability( 'mcp-edit-abilities/list-posts', array(
+    wp_register_ability( 'mcp-editor-abilities/list-posts', array(
         'label'               => 'List Posts',
         'description'         => 'Returns a paginated list of posts.',
         'category'            => 'post',
@@ -68,7 +76,7 @@ add_action( 'wp_abilities_api_init', function() {
     // ----------------------------------------------------------------
     // edit-post
     // ----------------------------------------------------------------
-    wp_register_ability( 'mcp-edit-abilities/edit-post', array(
+    wp_register_ability( 'mcp-editor-abilities/edit-post', array(
         'label'               => 'Edit Post',
         'description'         => "Updates a post's title and/or content.",
         'category'            => 'post',
@@ -108,7 +116,7 @@ add_action( 'wp_abilities_api_init', function() {
     // ----------------------------------------------------------------
     // edit-post-title
     // ----------------------------------------------------------------
-    wp_register_ability( 'mcp-edit-abilities/edit-post-title', array(
+    wp_register_ability( 'mcp-editor-abilities/edit-post-title', array(
         'label'               => 'Edit Post Title',
         'description'         => 'Updates only the title of a post.',
         'category'            => 'post',
@@ -139,7 +147,7 @@ add_action( 'wp_abilities_api_init', function() {
     // ----------------------------------------------------------------
     // edit-site-name
     // ----------------------------------------------------------------
-    wp_register_ability( 'mcp-edit-abilities/edit-site-name', array(
+    wp_register_ability( 'mcp-editor-abilities/edit-site-name', array(
         'label'               => 'Edit Site Name',
         'description'         => 'Updates the WordPress site name.',
         'category'            => 'site',
@@ -166,7 +174,7 @@ add_action( 'wp_abilities_api_init', function() {
     // ----------------------------------------------------------------
     // get-post-blocks
     // ----------------------------------------------------------------
-    wp_register_ability( 'mcp-edit-abilities/get-post-blocks', array(
+    wp_register_ability( 'mcp-editor-abilities/get-post-blocks', array(
         'label'               => 'Get Post Blocks',
         'description'         => 'Returns the list of Gutenberg blocks in a specific post.',
         'category'            => 'post',
@@ -207,7 +215,7 @@ add_action( 'wp_abilities_api_init', function() {
     // ----------------------------------------------------------------
     // edit-post-block
     // ----------------------------------------------------------------
-    wp_register_ability( 'mcp-edit-abilities/edit-post-block', array(
+    wp_register_ability( 'mcp-editor-abilities/edit-post-block', array(
         'label'               => 'Edit Post Block',
         'description'         => 'Replaces the attributes and/or inner HTML of a block at a given index in a post.',
         'category'            => 'post',
