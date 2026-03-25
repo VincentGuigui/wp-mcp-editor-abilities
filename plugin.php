@@ -43,6 +43,7 @@ add_action( 'wp_abilities_api_init', function() {
                 'page'     => array( 'type' => 'integer', 'minimum' => 1, 'default' => 1 ),
             ),
             'additionalProperties' => false,
+            'default'              => array(),
         ),
         'execute_callback'    => static function( $input = array() ): array {
             $per_page = $input['per_page'] ?? 10;
