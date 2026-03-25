@@ -103,8 +103,7 @@ if "!ABILITY!"=="" (
       -H "Content-Type: application/json" ^
       -H "Mcp-Session-Id: !SESSION_ID!" ^
       -d "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"mcp-adapter-discover-abilities\",\"arguments\":{}}}" > "!RESP_TMP!"
-    type "!RESP_TMP!"
-    echo.
+    powershell -NoProfile -Command "$j=Get-Content '!RESP_TMP!'|ConvertFrom-Json; $a=$j.result.structuredContent.abilities; if($a){$a|ForEach-Object{Write-Host ('* '+$_.name+' : '+$_.label); Write-Host ('  '+$_.description); Write-Host}} else{Write-Host 'No abilities found or unexpected response:'; Get-Content '!RESP_TMP!'}"
     if exist "!RESP_TMP!" del "!RESP_TMP!"
     goto :end
 )
