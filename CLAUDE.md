@@ -7,7 +7,7 @@ A WordPress plugin that registers content-management abilities and exposes them 
 ## Key design decisions
 
 - The `wp_register_ability_args` filter forces **all** abilities (core + third-party) to be MCP-public. This is intentional for development/testing — restrict in production.
-- Abilities are namespaced under `mcp-edit-abilities/`.
+- Abilities are namespaced under `mcp-editor-abilities/`.
 - Credentials for the test script live in `mcp-config.ini`, protected from web access by `.htaccess`.
 
 ## References
@@ -15,10 +15,10 @@ A WordPress plugin that registers content-management abilities and exposes them 
 - MCP Adapter plugin: https://github.com/wordpress/mcp-adapter
 - WordPress Abilities API (WP 6.9+): https://make.wordpress.org/core/2025/03/07/abilities-api/
 - MCP protocol spec: https://modelcontextprotocol.io/
-- Plugin repo: https://github.com/vincentguigui/wp-mcp-edit-abilities
+- Plugin repo: https://github.com/vincentguigui/wp-mcp-editor-abilities
 
 ## Local dev
 
-- Site URL: `https://cnxrfr/` (self-signed cert, use `curl -k`)
-- MCP endpoint: `https://cnxrfr/wp-json/mcp/mcp-adapter-default-server`
+- Site URL: `https://your-site/` (self-signed cert, use `curl -k`)
+- MCP endpoint: `https://your-site/wp-json/mcp/mcp-adapter-default-server`
 - Test with: `mcp.bat` (no args = list abilities, with arg = execute ability)

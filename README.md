@@ -41,11 +41,12 @@ A `mcp.bat` script is included for quick testing from the Windows command line.
 ### Configuration
 
 Credentials are stored in `mcp-config.ini` (same folder as the batch). This file is protected from web access by the included `.htaccess`.
+Use `mcp-config.sample.ini` as a sample.
 
 ```ini
 ; mcp-config.ini
 [mcp]
-url      = https://your-site.local
+url      = https://your-site
 username = your-user
 password = xxxx xxxx xxxx xxxx xxxx xxxx
 ```
