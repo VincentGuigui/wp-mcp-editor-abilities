@@ -8,16 +8,39 @@ A WordPress plugin that exposes content-management abilities through the [MCP Ad
 
 1. **Forces all WordPress abilities to be MCP-public** — any ability registered by core or other plugins is automatically exposed through MCP (via the `wp_register_ability_args` filter).
 
-2. **Registers 6 custom editor abilities:**
+2. **Registers 12 custom editor abilities:**
 
+### Posts
 | Ability | Description | Permission |
 |---|---|---|
-| `mcp-editor-abilities/list-posts` | Paginated list of posts (filterable by status) | `edit_posts` |
-| `mcp-editor-abilities/edit-post` | Update a post's title and/or content | `edit_post` |
-| `mcp-editor-abilities/edit-post-title` | Update only the title of a post | `edit_post` |
-| `mcp-editor-abilities/edit-site-name` | Change the WordPress site name | `manage_options` |
-| `mcp-editor-abilities/get-post-blocks` | List all Gutenberg blocks in a post | `edit_post` |
-| `mcp-editor-abilities/edit-post-block` | Edit a specific block's attributes or HTML | `edit_post` |
+| `mcp-editor/list-posts` | Paginated list of posts (filterable by status) | `edit_posts` |
+| `mcp-editor/add-post` | Create a new post (defaults to draft) | `edit_posts` |
+| `mcp-editor/duplicate-post` | Duplicate an existing post as a new draft | `edit_post` |
+| `mcp-editor/update-post-field` | Update a single post field (title, status, date, excerpt, slug, content) | `edit_post` |
+
+### Post Blocks
+| Ability | Description | Permission |
+|---|---|---|
+| `mcp-editor/list-post-blocks` | List all Gutenberg blocks in a post | `edit_post` |
+| `mcp-editor/update-post-block` | Edit a specific block's attributes or HTML | `edit_post` |
+
+### Categories
+| Ability | Description | Permission |
+|---|---|---|
+| `mcp-editor/list-categories` | Paginated list of categories | `manage_categories` |
+| `mcp-editor/add-category` | Create a new category | `manage_categories` |
+| `mcp-editor/update-category-field` | Update a single category field (name, slug, description, parent) | `manage_categories` |
+
+### Post ↔ Category
+| Ability | Description | Permission |
+|---|---|---|
+| `mcp-editor/assign-post-category` | Add a category to a post | `edit_post` |
+| `mcp-editor/remove-post-category` | Remove a category from a post | `edit_post` |
+
+### Site
+| Ability | Description | Permission |
+|---|---|---|
+| `mcp-editor/update-site-field` | Update a site option (name, description) | `manage_options` |
 
 3. **Boots the MCP Adapter** so the abilities are reachable over the MCP JSON-RPC endpoint.
 
@@ -29,7 +52,7 @@ A WordPress plugin that exposes content-management abilities through the [MCP Ad
 
 ## Installation
 
-1. Copy the `mcp-editor-abilities` folder into `wp-content/plugins/`.
+1. Copy the `mcp-edit-abilities` folder into `wp-content/plugins/`.
 2. Activate **MCP Adapter** in the WordPress admin.
 3. Activate **MCP Editor Abilities** in the WordPress admin.
 4. Create an application password for your user under **Users → Profile → Application Passwords**.
@@ -41,14 +64,13 @@ A `mcp.bat` script is included for quick testing from the Windows command line.
 ### Configuration
 
 Credentials are stored in `mcp-config.ini` (same folder as the batch). This file is protected from web access by the included `.htaccess`.
-Use `mcp-config.sample.ini` as a sample.
 
 ```ini
 ; mcp-config.ini
 [mcp]
-url      = https://your-site
-username = your-user
-password = xxxx xxxx xxxx xxxx xxxx xxxx
+url=https://your-site
+username=your-user
+password=xxxx xxxx xxxx xxxx xxxx xxxx
 ```
 
 ### Usage
@@ -57,19 +79,27 @@ password = xxxx xxxx xxxx xxxx xxxx xxxx
 :: List all available abilities
 mcp.bat
 
-:: Execute an ability (no parameters)
-mcp.bat mcp-editor-abilities/list-posts
+:: Execute abilities without parameters
+mcp.bat mcp-editor/list-posts
+mcp.bat mcp-editor/list-categories
 
-:: Execute an ability with JSON parameters
-mcp.bat mcp-editor-abilities/list-posts "{\"per_page\":5}"
-mcp.bat mcp-editor-abilities/get-post-blocks "{\"id\":1}"
-mcp.bat mcp-editor-abilities/edit-post-title "{\"id\":1,\"title\":\"New Title\"}"
-mcp.bat mcp-editor-abilities/edit-post-block "{\"id\":1,\"block_index\":0,\"inner_html\":\"<p>Updated</p>\"}"
+:: Execute abilities with JSON parameters
+mcp.bat mcp-editor/list-posts "{\"per_page\":5}"
+mcp.bat mcp-editor/add-post "{\"title\":\"My New Post\"}"
+mcp.bat mcp-editor/duplicate-post "{\"id\":1}"
+mcp.bat mcp-editor/update-post-field "{\"id\":1,\"field\":\"title\",\"value\":\"New Title\"}"
+mcp.bat mcp-editor/list-post-blocks "{\"id\":1}"
+mcp.bat mcp-editor/update-post-block "{\"id\":1,\"block_index\":0,\"inner_html\":\"<p>Updated</p>\"}"
+mcp.bat mcp-editor/add-category "{\"name\":\"My Category\"}"
+mcp.bat mcp-editor/update-category-field "{\"id\":12,\"field\":\"name\",\"value\":\"Renamed\"}"
+mcp.bat mcp-editor/assign-post-category "{\"post_id\":1,\"category_id\":12}"
+mcp.bat mcp-editor/remove-post-category "{\"post_id\":1,\"category_id\":12}"
+mcp.bat mcp-editor/update-site-field "{\"field\":\"name\",\"value\":\"My Site\"}"
 ```
 
 ## Security notes
 
-- All abilities enforce WordPress capability checks (`edit_post`, `manage_options`, etc.).
+- All abilities enforce WordPress capability checks (`edit_post`, `manage_options`, `manage_categories`).
 - The `mcp-config.ini` file containing credentials is blocked from web access via `.htaccess`.
 - MCP requests require HTTP Basic Auth with an application password.
 - For production use, consider moving `mcp-config.ini` outside the web root entirely.
