@@ -39,7 +39,12 @@ if "!URL!"=="" (
 )
 
 set "ABILITY=%~1"
-set "PARAMS=%~2"
+:: Capture everything after the first argument as PARAMS (handles spaces in JSON values)
+set "PARAMS="
+if not "%~2"=="" (
+    set "ALLARGS=%*"
+    for /f "tokens=1,* delims= " %%A in ("!ALLARGS!") do set "PARAMS=%%B"
+)
 set "ENDPOINT=!URL!/wp-json/mcp/mcp-adapter-default-server"
 set "HEADERS_TMP=%TEMP%\mcp_headers.tmp"
 set "RESP_TMP=%TEMP%\mcp_resp.tmp"
@@ -92,10 +97,22 @@ echo.
 
 if "!PARAMS!"=="" set "PARAMS={}"
 
+:: Build JSON body via PowerShell (write params to file to avoid quote issues)
+set "BODY_TMP=%TEMP%\mcp_body.tmp"
+set "PARAMS_TMP=%TEMP%\mcp_params.tmp"
+>"!PARAMS_TMP!" (echo !PARAMS!)
+set "MCP_ABILITY=!ABILITY!"
+set "MCP_PARAMS_FILE=!PARAMS_TMP!"
+set "MCP_OUTFILE=!BODY_TMP!"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0mcp-build-body.ps1"
+
+if exist "!PARAMS_TMP!" del "!PARAMS_TMP!"
+
 curl -k -s -u "!USERNAME!:!PASSWORD!" -X POST "!ENDPOINT!" ^
   -H "Content-Type: application/json" ^
   -H "Mcp-Session-Id: !SESSION_ID!" ^
-  -d "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"mcp-adapter-execute-ability\",\"arguments\":{\"ability_name\":\"!ABILITY!\",\"parameters\":!PARAMS!}}}" > "!RESP_TMP!"
+  -d @"!BODY_TMP!" > "!RESP_TMP!"
+if exist "!BODY_TMP!" del "!BODY_TMP!"
 
 powershell -NoProfile -Command "Get-Content '!RESP_TMP!' | ConvertFrom-Json | ConvertTo-Json -Depth 10"
 echo.
