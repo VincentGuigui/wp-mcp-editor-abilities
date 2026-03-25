@@ -8,7 +8,7 @@ A WordPress plugin that exposes content-management abilities through the [MCP Ad
 
 1. **Forces all WordPress abilities to be MCP-public** — any ability registered by core or other plugins is automatically exposed through MCP (via the `wp_register_ability_args` filter).
 
-2. **Registers 12 custom editor abilities:**
+2. **Registers 16 custom editor abilities:**
 
 ### Posts
 | Ability | Description | Permission |
@@ -16,12 +16,14 @@ A WordPress plugin that exposes content-management abilities through the [MCP Ad
 | `mcp-editor/list-posts` | Paginated list of posts (filterable by status) | `edit_posts` |
 | `mcp-editor/add-post` | Create a new post (defaults to draft) | `edit_posts` |
 | `mcp-editor/duplicate-post` | Duplicate an existing post as a new draft | `edit_post` |
+| `mcp-editor/get-post-field` | Read a single post field (title, status, date, excerpt, slug, content) | `edit_post` |
 | `mcp-editor/update-post-field` | Update a single post field (title, status, date, excerpt, slug, content) | `edit_post` |
 
 ### Post Blocks
 | Ability | Description | Permission |
 |---|---|---|
 | `mcp-editor/list-post-blocks` | List all Gutenberg blocks in a post | `edit_post` |
+| `mcp-editor/get-post-block` | Read a single block by index | `edit_post` |
 | `mcp-editor/update-post-block` | Edit a specific block's attributes or HTML | `edit_post` |
 
 ### Categories
@@ -34,12 +36,14 @@ A WordPress plugin that exposes content-management abilities through the [MCP Ad
 ### Post ↔ Category
 | Ability | Description | Permission |
 |---|---|---|
+| `mcp-editor/list-post-categories` | List categories assigned to a post | `edit_post` |
 | `mcp-editor/assign-post-category` | Add a category to a post | `edit_post` |
 | `mcp-editor/remove-post-category` | Remove a category from a post | `edit_post` |
 
 ### Site
 | Ability | Description | Permission |
 |---|---|---|
+| `mcp-editor/get-site-field` | Read a site option (name, description) | `manage_options` |
 | `mcp-editor/update-site-field` | Update a site option (name, description) | `manage_options` |
 
 3. **Boots the MCP Adapter** so the abilities are reachable over the MCP JSON-RPC endpoint.
@@ -75,26 +79,38 @@ password=xxxx xxxx xxxx xxxx xxxx xxxx
 
 ### Usage
 
+Parameters are passed as key/value pairs after the ability name. Integer values are auto-detected. Wrap values containing spaces in double quotes.
+
 ```batch
 :: List all available abilities
 mcp.bat
 
-:: Execute abilities without parameters
+:: Posts
 mcp.bat mcp-editor/list-posts
-mcp.bat mcp-editor/list-categories
+mcp.bat mcp-editor/list-posts per_page 5 status draft
+mcp.bat mcp-editor/add-post title "My New Post"
+mcp.bat mcp-editor/duplicate-post id 1
+mcp.bat mcp-editor/get-post-field id 1 field title
+mcp.bat mcp-editor/update-post-field id 1 field title value "New Title"
 
-:: Execute abilities with JSON parameters
-mcp.bat mcp-editor/list-posts "{\"per_page\":5}"
-mcp.bat mcp-editor/add-post "{\"title\":\"My New Post\"}"
-mcp.bat mcp-editor/duplicate-post "{\"id\":1}"
-mcp.bat mcp-editor/update-post-field "{\"id\":1,\"field\":\"title\",\"value\":\"New Title\"}"
-mcp.bat mcp-editor/list-post-blocks "{\"id\":1}"
-mcp.bat mcp-editor/update-post-block "{\"id\":1,\"block_index\":0,\"inner_html\":\"<p>Updated</p>\"}"
-mcp.bat mcp-editor/add-category "{\"name\":\"My Category\"}"
-mcp.bat mcp-editor/update-category-field "{\"id\":12,\"field\":\"name\",\"value\":\"Renamed\"}"
-mcp.bat mcp-editor/assign-post-category "{\"post_id\":1,\"category_id\":12}"
-mcp.bat mcp-editor/remove-post-category "{\"post_id\":1,\"category_id\":12}"
-mcp.bat mcp-editor/update-site-field "{\"field\":\"name\",\"value\":\"My Site\"}"
+:: Post blocks
+mcp.bat mcp-editor/list-post-blocks id 1
+mcp.bat mcp-editor/get-post-block id 1 block_index 0
+mcp.bat mcp-editor/update-post-block id 1 block_index 0 inner_html "<p>Updated</p>"
+
+:: Categories
+mcp.bat mcp-editor/list-categories
+mcp.bat mcp-editor/add-category name "My Category"
+mcp.bat mcp-editor/update-category-field id 12 field name value Renamed
+
+:: Post categories
+mcp.bat mcp-editor/list-post-categories id 1
+mcp.bat mcp-editor/assign-post-category post_id 1 category_id 12
+mcp.bat mcp-editor/remove-post-category post_id 1 category_id 12
+
+:: Site
+mcp.bat mcp-editor/get-site-field field name
+mcp.bat mcp-editor/update-site-field field name value "My Site"
 ```
 
 ## Security notes
