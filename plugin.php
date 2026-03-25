@@ -149,6 +149,40 @@ add_action( 'wp_abilities_api_init', function() {
     ) );
 
     $post_field_enum = array( 'title', 'status', 'date', 'excerpt', 'slug', 'content' );
+    wp_register_ability( 'mcp-editor/get-post-field', array(
+        'label'               => 'Get Post Field',
+        'description'         => 'Returns a single field value from a post. Allowed fields: ' . implode( ', ', $post_field_enum ) . '.',
+        'category'            => 'post',
+        'input_schema'        => array(
+            'type'                 => 'object',
+            'required'             => array( 'id', 'field' ),
+            'properties'           => array(
+                'id'    => array( 'type' => 'integer' ),
+                'field' => array( 'type' => 'string', 'enum' => $post_field_enum ),
+            ),
+            'additionalProperties' => false,
+        ),
+        'execute_callback'    => static function( $input ): array {
+            $map = array(
+                'title'   => 'post_title',
+                'status'  => 'post_status',
+                'date'    => 'post_date',
+                'excerpt' => 'post_excerpt',
+                'slug'    => 'post_name',
+                'content' => 'post_content',
+            );
+            $post = get_post( (int) $input['id'] );
+            if ( ! $post ) {
+                return array( 'error' => 'Post not found.' );
+            }
+            return array( 'id' => $post->ID, 'field' => $input['field'], 'value' => $post->{ $map[ $input['field'] ] } );
+        },
+        'permission_callback' => static function( $input ): bool {
+            return current_user_can( 'edit_post', (int) $input['id'] );
+        },
+        'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+    ) );
+
     wp_register_ability( 'mcp-editor/update-post-field', array(
         'label'               => 'Update Post Field',
         'description'         => 'Updates a single field on a post. Allowed fields: ' . implode( ', ', $post_field_enum ) . '.',
@@ -218,6 +252,43 @@ add_action( 'wp_abilities_api_init', function() {
                 );
             }
             return $result;
+        },
+        'permission_callback' => static function( $input ): bool {
+            return current_user_can( 'edit_post', (int) $input['id'] );
+        },
+        'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+    ) );
+
+    wp_register_ability( 'mcp-editor/get-post-block', array(
+        'label'               => 'Get Post Block',
+        'description'         => 'Returns a single Gutenberg block by index from a post.',
+        'category'            => 'post',
+        'input_schema'        => array(
+            'type'                 => 'object',
+            'required'             => array( 'id', 'block_index' ),
+            'properties'           => array(
+                'id'          => array( 'type' => 'integer' ),
+                'block_index' => array( 'type' => 'integer', 'minimum' => 0 ),
+            ),
+            'additionalProperties' => false,
+        ),
+        'execute_callback'    => static function( $input ): array {
+            $post = get_post( (int) $input['id'] );
+            if ( ! $post ) {
+                return array( 'error' => 'Post not found.' );
+            }
+            $blocks = parse_blocks( $post->post_content );
+            $idx    = (int) $input['block_index'];
+            if ( ! isset( $blocks[ $idx ] ) || empty( $blocks[ $idx ]['blockName'] ) ) {
+                return array( 'error' => "Block at index {$idx} not found." );
+            }
+            return array(
+                'id'         => $post->ID,
+                'block_index' => $idx,
+                'block_name' => $blocks[ $idx ]['blockName'],
+                'attrs'      => $blocks[ $idx ]['attrs'],
+                'inner_html' => trim( $blocks[ $idx ]['innerHTML'] ),
+            );
         },
         'permission_callback' => static function( $input ): bool {
             return current_user_can( 'edit_post', (int) $input['id'] );
@@ -383,6 +454,41 @@ add_action( 'wp_abilities_api_init', function() {
     //  POST ↔ CATEGORY
     // ==========================================================
 
+    wp_register_ability( 'mcp-editor/list-post-categories', array(
+        'label'               => 'List Post Categories',
+        'description'         => 'Returns the categories assigned to a specific post.',
+        'category'            => 'post',
+        'input_schema'        => array(
+            'type'                 => 'object',
+            'required'             => array( 'id' ),
+            'properties'           => array(
+                'id' => array( 'type' => 'integer' ),
+            ),
+            'additionalProperties' => false,
+        ),
+        'execute_callback'    => static function( $input ): array {
+            $post = get_post( (int) $input['id'] );
+            if ( ! $post ) {
+                return array( 'error' => 'Post not found.' );
+            }
+            $terms = wp_get_post_categories( $post->ID, array( 'fields' => 'all' ) );
+            if ( is_wp_error( $terms ) ) {
+                return array( 'error' => $terms->get_error_message() );
+            }
+            return array_map( static function( $t ) {
+                return array(
+                    'id'   => $t->term_id,
+                    'name' => $t->name,
+                    'slug' => $t->slug,
+                );
+            }, $terms );
+        },
+        'permission_callback' => static function( $input ): bool {
+            return current_user_can( 'edit_post', (int) $input['id'] );
+        },
+        'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+    ) );
+
     wp_register_ability( 'mcp-editor/assign-post-category', array(
         'label'               => 'Assign Category to Post',
         'description'         => 'Adds a category to a post.',
@@ -448,6 +554,28 @@ add_action( 'wp_abilities_api_init', function() {
     // ==========================================================
 
     $site_field_enum = array( 'name', 'description' );
+    wp_register_ability( 'mcp-editor/get-site-field', array(
+        'label'               => 'Get Site Field',
+        'description'         => 'Returns a single site option value. Allowed fields: ' . implode( ', ', $site_field_enum ) . '.',
+        'category'            => 'site',
+        'input_schema'        => array(
+            'type'                 => 'object',
+            'required'             => array( 'field' ),
+            'properties'           => array(
+                'field' => array( 'type' => 'string', 'enum' => $site_field_enum ),
+            ),
+            'additionalProperties' => false,
+        ),
+        'execute_callback'    => static function( $input ): array {
+            $map = array( 'name' => 'blogname', 'description' => 'blogdescription' );
+            return array( 'field' => $input['field'], 'value' => get_option( $map[ $input['field'] ] ) );
+        },
+        'permission_callback' => static function(): bool {
+            return current_user_can( 'manage_options' );
+        },
+        'meta' => array( 'annotations' => array( 'readonly' => true, 'destructive' => false, 'idempotent' => true ) ),
+    ) );
+
     wp_register_ability( 'mcp-editor/update-site-field', array(
         'label'               => 'Update Site Field',
         'description'         => 'Updates a site option. Allowed fields: ' . implode( ', ', $site_field_enum ) . '.',
