@@ -12,12 +12,12 @@ A WordPress plugin that exposes content-management abilities through the [MCP Ad
 
 | Ability | Description | Permission |
 |---|---|---|
-| `mcp-edit-abilities/list-posts` | Paginated list of posts (filterable by status) | `edit_posts` |
-| `mcp-edit-abilities/edit-post` | Update a post's title and/or content | `edit_post` |
-| `mcp-edit-abilities/edit-post-title` | Update only the title of a post | `edit_post` |
-| `mcp-edit-abilities/edit-site-name` | Change the WordPress site name | `manage_options` |
-| `mcp-edit-abilities/get-post-blocks` | List all Gutenberg blocks in a post | `edit_post` |
-| `mcp-edit-abilities/edit-post-block` | Edit a specific block's attributes or HTML | `edit_post` |
+| `mcp-editor-abilities/list-posts` | Paginated list of posts (filterable by status) | `edit_posts` |
+| `mcp-editor-abilities/edit-post` | Update a post's title and/or content | `edit_post` |
+| `mcp-editor-abilities/edit-post-title` | Update only the title of a post | `edit_post` |
+| `mcp-editor-abilities/edit-site-name` | Change the WordPress site name | `manage_options` |
+| `mcp-editor-abilities/get-post-blocks` | List all Gutenberg blocks in a post | `edit_post` |
+| `mcp-editor-abilities/edit-post-block` | Edit a specific block's attributes or HTML | `edit_post` |
 
 3. **Boots the MCP Adapter** so the abilities are reachable over the MCP JSON-RPC endpoint.
 
@@ -29,7 +29,7 @@ A WordPress plugin that exposes content-management abilities through the [MCP Ad
 
 ## Installation
 
-1. Copy the `mcp-edit-abilities` folder into `wp-content/plugins/`.
+1. Copy the `mcp-editor-abilities` folder into `wp-content/plugins/`.
 2. Activate **MCP Adapter** in the WordPress admin.
 3. Activate **MCP Editor Abilities** in the WordPress admin.
 4. Create an application password for your user under **Users → Profile → Application Passwords**.
@@ -57,13 +57,13 @@ password = xxxx xxxx xxxx xxxx xxxx xxxx
 mcp.bat
 
 :: Execute an ability (no parameters)
-mcp.bat mcp-edit-abilities/list-posts
+mcp.bat mcp-editor-abilities/list-posts
 
 :: Execute an ability with JSON parameters
-mcp.bat mcp-edit-abilities/list-posts "{\"per_page\":5}"
-mcp.bat mcp-edit-abilities/get-post-blocks "{\"id\":1}"
-mcp.bat mcp-edit-abilities/edit-post-title "{\"id\":1,\"title\":\"New Title\"}"
-mcp.bat mcp-edit-abilities/edit-post-block "{\"id\":1,\"block_index\":0,\"inner_html\":\"<p>Updated</p>\"}"
+mcp.bat mcp-editor-abilities/list-posts "{\"per_page\":5}"
+mcp.bat mcp-editor-abilities/get-post-blocks "{\"id\":1}"
+mcp.bat mcp-editor-abilities/edit-post-title "{\"id\":1,\"title\":\"New Title\"}"
+mcp.bat mcp-editor-abilities/edit-post-block "{\"id\":1,\"block_index\":0,\"inner_html\":\"<p>Updated</p>\"}"
 ```
 
 ## Security notes
